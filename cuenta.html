@@ -3,46 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ariazz - Tienda de Ropa Personalizadas</title>
-    <link rel="icon" href="img/logo.png" type="image/x-icon">
+    <title>Ariazz - Iniciar Sesión</title>
     <link rel="stylesheet" href="estiloc.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        .error-message {
-            color: red;
-            font-size: 0.9em;
-            margin-top: 5px;
+        .error-message { color: red; font-size: 0.9em; margin-top: 5px; }
+        .register-link {
+            display: block;
+            margin-top: 10px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <!-- Sección del barra de inicio -->
     <header>
-        <div class="nav-container">
-            <div class="logo">
-                <a href="index.html">
-                    <img src="img/logo.png" alt="Logo">
-                </a>
-            </div>
-            <nav>
-                <ul class="menu">
-                    <li><a href="index.html">Inicio</a></li>
-                    <li><a href="catalogo.html">Catálogo</a></li>
-                    <li><a href="presave.html">PRE SAVE</a></li>
-                    <li><a href="#">Personalización</a></li>
-                </ul>
-            </nav>
-            <div class="icons">
-                <a href="cuenta.html"><i class="fas fa-user"></i> Cuenta</a>
-                <a href="carrito.html"><i class="fas fa-shopping-cart"></i> Carrito</a>
-            </div>
-        </div>
+        <!-- Barra de navegación -->
     </header>
 
     <div class="login-container">
         <div class="login-box">
             <h2>Iniciar sesión</h2>
-            <p>¿Es tu primera vez? <a href="registrar.html">Regístrate</a></p>
             <form id="loginForm">
                 <div class="input-group">
                     <label for="email">Email *</label>
@@ -54,74 +34,45 @@
                     <input type="password" id="password" name="password" required>
                     <div id="password-error" class="error-message"></div>
                 </div>
-                <a href="#" class="forgot-password">¿Olvidaste la contraseña?</a>
                 <button type="button" class="login-button">Iniciar sesión</button>
-
-                <!-- Campo de código de verificación (oculto al inicio) -->
-                <div id="verification-step" style="display: none;">
-                    <h3>Verificación de 2 pasos</h3>
-                    <p>Ingresa el código que enviamos a tu correo.</p>
-                    <input type="text" id="verificationCode" placeholder="Código de verificación" maxlength="4">
-                    <div id="code-error" class="error-message"></div>
-                    <button type="button" class="verify-button">Verificar código</button>
-                </div>
             </form>
+            <div class="register-link">
+                <p>¿No tienes cuenta? <a href="registrar.html">Regístrate aquí</a></p>
+            </div>
         </div>
     </div>
 
     <script>
-        const fakeUsers = [
-            { email: "angeladalarias@gmail.com", password: "angelarias04" },
-            { email: "usuario2@correo.com", password: "contrasena456" },
-            { email: "usuario3@correo.com", password: "contrasena789" },
-            { email: "elangelarias0@gmail.com", password: "contrasena123" }
-        ];
-        
-        let generatedCode;
-
-        function generateVerificationCode() {
-            return Math.floor(1000 + Math.random() * 9000).toString();
-        }
-
         function handleLogin(event) {
             event.preventDefault();
-
-            const emailInput = document.getElementById("email").value.trim();
-            const passwordInput = document.getElementById("password").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
             const emailError = document.getElementById("email-error");
             const passwordError = document.getElementById("password-error");
 
-            emailError.textContent = ""; // Limpia mensajes previos
+            emailError.textContent = "";
             passwordError.textContent = "";
 
-            const userExists = fakeUsers.some(user => user.email === emailInput && user.password === passwordInput);
+            const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+            const user = registeredUsers.find(user => user.email === email && user.password === password);
 
-            if (userExists) {
-                generatedCode = generateVerificationCode();
-                alert(`Código de verificación enviado: ${generatedCode}`);
-                document.getElementById("verification-step").style.display = "block";
+            if (user) {
+                // Verificamos si el rol del usuario es 'admin'
+                if (user.role === "admin") {
+                    sessionStorage.setItem("currentUser", JSON.stringify(user));
+                    alert("Inicio de sesión exitoso como Admin");
+                    window.location.href = "login.html";  // Redirigir al panel de admin
+                } else {
+                    // Si el usuario es un cliente, mostrar un error
+                    alert("No tienes permisos para acceder a esta página.");
+                }
             } else {
-                emailError.textContent = "Correo  incorrecto. Por favor, intenta de nuevo.";
-                passwordError.textContent = "Contraseña incorrectA. Por favor, intenta de nuevo.";
-            }
-        }
-
-        function verifyCode() {
-            const enteredCode = document.getElementById("verificationCode").value;
-            const codeError = document.getElementById("code-error");
-
-            codeError.textContent = ""; // Limpia mensajes previos
-
-            if (enteredCode === generatedCode) {
-                alert("Código verificado correctamente. Bienvenido!");
-                window.location.href = "index.html";
-            } else {
-                codeError.textContent = "Código de verificación incorrecto. Intenta de nuevo.";
+                emailError.textContent = "Correo o contraseña incorrectos.";
             }
         }
 
         document.querySelector(".login-button").addEventListener("click", handleLogin);
-        document.querySelector(".verify-button").addEventListener("click", verifyCode);
     </script>
+    
 </body>
 </html>

@@ -312,3 +312,8 @@ input[type="password"] {
 #verification-step .verify-button:hover {
     background-color: #333;
 }
+.register-link {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+}
