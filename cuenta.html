@@ -13,6 +13,10 @@
             margin-top: 10px;
             text-align: center;
         }
+        .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -36,6 +40,9 @@
                 </div>
                 <button type="button" class="login-button">Iniciar sesión</button>
             </form>
+            <div class="forgot-password">
+                <p><a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a></p>
+            </div>
             <div class="register-link">
                 <p>¿No tienes cuenta? <a href="registrar.html">Regístrate aquí</a></p>
             </div>
@@ -43,8 +50,14 @@
     </div>
 
     <script>
-        function handleLogin(event) {
+        document.querySelector(".login-button").addEventListener("click", handleLogin);
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
             event.preventDefault();
+            handleLogin();
+        });
+
+        // Función para manejar el inicio de sesión
+        function handleLogin() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
             const emailError = document.getElementById("email-error");
@@ -53,6 +66,7 @@
             emailError.textContent = "";
             passwordError.textContent = "";
 
+            // Recuperar los usuarios registrados del localStorage
             const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
             const user = registeredUsers.find(user => user.email === email && user.password === password);
 
@@ -61,9 +75,8 @@
                 if (user.role === "admin") {
                     sessionStorage.setItem("currentUser", JSON.stringify(user));
                     alert("Inicio de sesión exitoso como Admin");
-                    window.location.href = "login.html";  // Redirigir al panel de admin
+                    window.location.href = "admin-panel.html";  // Redirigir al panel de admin
                 } else {
-                    // Si el usuario es un cliente, mostrar un error
                     alert("No tienes permisos para acceder a esta página.");
                 }
             } else {
@@ -71,8 +84,55 @@
             }
         }
 
-        document.querySelector(".login-button").addEventListener("click", handleLogin);
+        // Función para registrar un nuevo usuario
+        function registerUser(email, password, role) {
+            const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+
+            // Crear un objeto de usuario
+            const newUser = {
+                email: email,
+                password: password,
+                role: role || "user"  // Por defecto el rol es 'user'
+            };
+
+            // Agregar el nuevo usuario a la lista
+            registeredUsers.push(newUser);
+            localStorage.setItem("registeredUsers", JSON.stringify(registeredUsers));
+            alert("Usuario registrado exitosamente.");
+        }
+
+        // Función para cambiar la contraseña
+        function changePassword(email, newPassword) {
+            const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+            const userIndex = registeredUsers.findIndex(user => user.email === email);
+
+            if (userIndex !== -1) {
+                registeredUsers[userIndex].password = newPassword;
+                localStorage.setItem("registeredUsers", JSON.stringify(registeredUsers));
+                alert("Contraseña actualizada exitosamente.");
+            } else {
+                alert("Usuario no encontrado.");
+            }
+        }
+
+        // Funcionalidad para "¿Olvidaste tu contraseña?"
+        document.getElementById("forgotPasswordLink").addEventListener("click", function() {
+            const email = prompt("Ingresa tu correo electrónico para restablecer la contraseña:");
+            if (email) {
+                const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+                const user = registeredUsers.find(user => user.email === email);
+                if (user) {
+                    const newPassword = prompt("Ingresa tu nueva contraseña:");
+                    if (newPassword) {
+                        changePassword(email, newPassword);
+                    } else {
+                        alert("No se ingresó una nueva contraseña.");
+                    }
+                } else {
+                    alert("Correo no registrado.");
+                }
+            }
+        });
     </script>
-    
 </body>
 </html>
